@@ -42,4 +42,4 @@ CREATE TABLE orders (
 );
 
 INSERT INTO products (code,name,category,description,weight,price,stock,image) VALUES
-('LP-001','Lapin entier préparé','entier','Lapin préparé, prêt à cuisiner.','1,2 kg',8000,'', '');
+('LP-001','Lapin entier préparé','entier','Lapin préparé, prêt à cuisiner.','1,2 kg',8000,0,'');
