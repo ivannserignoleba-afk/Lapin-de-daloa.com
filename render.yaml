@@ -1,0 +1,20 @@
+services:
+  - type: web
+    name: lapin-de-daloa-api
+    runtime: node
+    rootDir: backend
+    buildCommand: npm install
+    startCommand: npm start
+    envVars:
+      - key: DB_HOST
+        sync: false
+      - key: DB_PORT
+        value: "3306"
+      - key: DB_USER
+        sync: false
+      - key: DB_PASSWORD
+        sync: false
+      - key: DB_NAME
+        value: lapin_daloa
+      - key: CORS_ORIGIN
+        value: https://ivannserignoleba-afk.github.io
