@@ -1,0 +1,19 @@
+import express from 'express';
+import cors from 'cors';
+import dotenv from 'dotenv';
+import mysql from 'mysql2/promise';
+
+dotenv.config();
+const app=express();
+app.use(cors({origin:process.env.CORS_ORIGIN||true}));
+app.use(express.json());
+const pool=mysql.createPool({host:process.env.DB_HOST,port:Number(process.env.DB_PORT||3306),user:process.env.DB_USER,password:process.env.DB_PASSWORD,database:process.env.DB_NAME,waitForConnections:true,connectionLimit:10});
+
+app.get('/api/health',async(req,res)=>{try{await pool.query('SELECT 1');res.json({ok:true,service:'Lapin de Daloa API'});}catch(e){res.status(500).json({ok:false,error:'Base de données indisponible'});}});
+app.get('/api/products',async(req,res)=>{try{const [rows]=await pool.query('SELECT * FROM products WHERE active=1 ORDER BY id DESC');res.json(rows);}catch(e){res.status(500).json({error:e.message});}});
+app.post('/api/products',async(req,res)=>{const {code,name,category='entier',description='',weight='',price=0,stock=0,image=''}=req.body;if(!code||!name)return res.status(400).json({error:'Code et nom obligatoires'});const c=await pool.getConnection();try{await c.beginTransaction();const [r]=await c.query('INSERT INTO products(code,name,category,description,weight,price,stock,image) VALUES(?,?,?,?,?,?,?,?)',[code,name,category,description,weight,price,stock,image]);if(Number(stock)>0)await c.query("INSERT INTO stock_movements(product_id,type,quantity,unit_price,reason) VALUES(?,?,?,?,?)",[r.insertId,'in',stock,price,'Stock initial']);await c.commit();res.status(201).json({id:r.insertId});}catch(e){await c.rollback();res.status(400).json({error:e.message});}finally{c.release();}});
+app.post('/api/stock/movement',async(req,res)=>{const {productId,type,quantity,unitPrice=0,reason=''}=req.body;if(!productId||!['in','out'].includes(type)||Number(quantity)<1)return res.status(400).json({error:'Données invalides'});const c=await pool.getConnection();try{await c.beginTransaction();const [[p]]=await c.query('SELECT stock FROM products WHERE id=? FOR UPDATE',[productId]);if(!p)return res.status(404).json({error:'Produit introuvable'});if(type==='out'&&p.stock<quantity)return res.status(409).json({error:`Stock insuffisant (${p.stock})`});const delta=type==='in'?Number(quantity):-Number(quantity);await c.query('UPDATE products SET stock=stock+? WHERE id=?',[delta,productId]);await c.query('INSERT INTO stock_movements(product_id,type,quantity,unit_price,reason) VALUES(?,?,?,?,?)',[productId,type,quantity,unitPrice,reason]);await c.commit();res.json({ok:true,newStock:p.stock+delta});}catch(e){await c.rollback();res.status(500).json({error:e.message});}finally{c.release();}});
+app.get('/api/stock/movements',async(req,res)=>{try{const [rows]=await pool.query('SELECT m.*,p.code,p.name FROM stock_movements m JOIN products p ON p.id=m.product_id ORDER BY m.created_at DESC');res.json(rows);}catch(e){res.status(500).json({error:e.message});}});
+app.get('/api/dashboard',async(req,res)=>{try{const [[s]]=await pool.query('SELECT COALESCE(SUM(stock),0) totalStock FROM products WHERE active=1');const [[m]]=await pool.query("SELECT COALESCE(SUM(CASE WHEN type='in' THEN quantity ELSE 0 END),0) totalIn,COALESCE(SUM(CASE WHEN type='out' THEN quantity ELSE 0 END),0) totalOut,COALESCE(SUM(CASE WHEN type='out' THEN quantity*unit_price ELSE 0 END),0) revenue FROM stock_movements");res.json({...s,...m});}catch(e){res.status(500).json({error:e.message});}});
+
+const port=Number(process.env.PORT||3000);app.listen(port,()=>console.log(`Lapin de Daloa API démarrée sur le port ${port}`));
