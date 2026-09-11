@@ -5,7 +5,8 @@
     "description": "Lapin mariné puis braisé lentement avec oignons, poivrons et épices locales.",
     "prix": 4500,
     "statut": "En stock",
-    "image": "https://picsum.photos/seed/lapin-braise/600/400"
+    "image": "https://picsum.photos/seed/lapin-braise/600/400",
+    "stock": 20
   },
   {
     "id": "2",
@@ -13,7 +14,8 @@
     "description": "Recette traditionnelle mijotée avec tomates, champignons et vin blanc.",
     "prix": 5000,
     "statut": "En stock",
-    "image": "https://picsum.photos/seed/lapin-chasseur/600/400"
+    "image": "https://picsum.photos/seed/lapin-chasseur/600/400",
+    "stock": 15
   },
   {
     "id": "3",
@@ -21,7 +23,8 @@
     "description": "Morceaux de lapin marinés, grillés au feu de bois, servis avec sauce pimentée.",
     "prix": 3000,
     "statut": "En stock",
-    "image": "https://picsum.photos/seed/brochettes-lapin/600/400"
+    "image": "https://picsum.photos/seed/brochettes-lapin/600/400",
+    "stock": 30
   },
   {
     "id": "4",
@@ -29,6 +32,7 @@
     "description": "Sauté rapide au gingembre frais, ail et légumes croquants.",
     "prix": 4000,
     "statut": "Épuisé",
-    "image": "https://picsum.photos/seed/lapin-gingembre/600/400"
+    "image": "https://picsum.photos/seed/lapin-gingembre/600/400",
+    "stock": 0
   }
 ]

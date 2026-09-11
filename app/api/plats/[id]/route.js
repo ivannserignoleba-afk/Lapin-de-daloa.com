@@ -1,10 +1,15 @@
 import { NextResponse } from 'next/server';
 import { readData, writeData } from '../../../../lib/db';
+import { requeteAuthentifiee } from '../../../../lib/auth';
 
 const FILE = 'plats.json';
 
-// PUT /api/plats/:id - modifie un plat (y compris changer le statut)
+// PUT /api/plats/:id - modifie un plat (y compris changer le statut) - réservé à l'admin
 export async function PUT(request, { params }) {
+  if (!requeteAuthentifiee(request)) {
+    return NextResponse.json({ error: 'Non authentifié.' }, { status: 401 });
+  }
+
   const { id } = params;
   const body = await request.json();
 
@@ -26,8 +31,12 @@ export async function PUT(request, { params }) {
   return NextResponse.json(plats[index]);
 }
 
-// DELETE /api/plats/:id - supprime un plat
+// DELETE /api/plats/:id - supprime un plat - réservé à l'admin
 export async function DELETE(request, { params }) {
+  if (!requeteAuthentifiee(request)) {
+    return NextResponse.json({ error: 'Non authentifié.' }, { status: 401 });
+  }
+
   const { id } = params;
   const plats = readData(FILE);
   const nouveauxPlats = plats.filter((p) => p.id !== id);

@@ -1,10 +1,16 @@
 import { NextResponse } from 'next/server';
 import { readData, writeData, generateId } from '../../../lib/db';
+import { requeteAuthentifiee } from '../../../lib/auth';
 
 const FILE = 'commandes.json';
 
-// GET /api/commandes - liste toutes les commandes (plus récentes d'abord)
-export async function GET() {
+// GET /api/commandes - liste toutes les commandes (réservé à l'admin : contient
+// des données personnelles clients - nom, téléphone, adresse)
+export async function GET(request) {
+  if (!requeteAuthentifiee(request)) {
+    return NextResponse.json({ error: 'Non authentifié.' }, { status: 401 });
+  }
+
   const commandes = readData(FILE);
   const triees = [...commandes].sort(
     (a, b) => new Date(b.dateCreation) - new Date(a.dateCreation)
@@ -42,6 +48,7 @@ export async function POST(request) {
     total,
     statut: 'En attente',
     dateCreation: new Date().toISOString(),
+    stockDeduit: false,
   };
 
   commandes.push(nouvelleCommande);

@@ -12,7 +12,10 @@
     "next": "15.5.9",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
-    "lucide-react": "^0.400.0"
+    "lucide-react": "^0.400.0",
+    "recharts": "^2.12.7",
+    "jspdf": "^2.5.2",
+    "html2canvas": "^1.4.1"
   },
   "devDependencies": {
     "autoprefixer": "^10.4.19",

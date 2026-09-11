@@ -1,9 +1,9 @@
-import AdminDashboard from '../../components/AdminDashboard';
+import AdminGate from '../../components/AdminGate';
 
 export const metadata = {
   title: 'Administration — Chez Lapin',
 };
 
 export default function AdminPage() {
-  return <AdminDashboard />;
+  return <AdminGate />;
 }
