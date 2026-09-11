@@ -1,0 +1,34 @@
+[
+  {
+    "id": "1",
+    "nom": "Lapin braisé",
+    "description": "Lapin mariné puis braisé lentement avec oignons, poivrons et épices locales.",
+    "prix": 4500,
+    "statut": "En stock",
+    "image": "https://picsum.photos/seed/lapin-braise/600/400"
+  },
+  {
+    "id": "2",
+    "nom": "Lapin au chasseur",
+    "description": "Recette traditionnelle mijotée avec tomates, champignons et vin blanc.",
+    "prix": 5000,
+    "statut": "En stock",
+    "image": "https://picsum.photos/seed/lapin-chasseur/600/400"
+  },
+  {
+    "id": "3",
+    "nom": "Brochettes de lapin",
+    "description": "Morceaux de lapin marinés, grillés au feu de bois, servis avec sauce pimentée.",
+    "prix": 3000,
+    "statut": "En stock",
+    "image": "https://picsum.photos/seed/brochettes-lapin/600/400"
+  },
+  {
+    "id": "4",
+    "nom": "Lapin sauté au gingembre",
+    "description": "Sauté rapide au gingembre frais, ail et légumes croquants.",
+    "prix": 4000,
+    "statut": "Épuisé",
+    "image": "https://picsum.photos/seed/lapin-gingembre/600/400"
+  }
+]
