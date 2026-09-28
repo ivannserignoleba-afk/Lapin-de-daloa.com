@@ -29,7 +29,7 @@ const STATUT_COULEUR = {
   Annulée: 'bg-red-100 text-red-700',
 };
 
-const PLAT_VIDE = { nom: '', description: '', prix: '', statut: 'En stock', image: '', stock: '' };
+const PLAT_VIDE = { nom: '', description: '', prix: '', prixGros: '', type: 'lapin_prepare', statut: 'En stock', image: '', stock: '' };
 
 export default function AdminDashboard({ onDeconnexion }) {
   const [ongletActif, setOngletActif] = useState('stats');
@@ -89,6 +89,8 @@ export default function AdminDashboard({ onDeconnexion }) {
       nom: plat.nom,
       description: plat.description,
       prix: plat.prix,
+      prixGros: plat.prixGros ?? '',
+      type: plat.type || 'lapin_prepare',
       statut: plat.statut,
       image: plat.image,
       stock: plat.stock ?? 0,
@@ -98,7 +100,7 @@ export default function AdminDashboard({ onDeconnexion }) {
 
   async function enregistrerPlat(e) {
     e.preventDefault();
-    const payload = { ...formPlat, prix: Number(formPlat.prix), stock: Number(formPlat.stock) || 0 };
+    const payload = { ...formPlat, prix: Number(formPlat.prix), prixGros: Number(formPlat.prixGros) || 0, stock: Number(formPlat.stock) || 0 };
 
     if (platEnEdition) {
       const res = await fetch(`/api/plats/${platEnEdition.id}`, {
@@ -245,7 +247,8 @@ export default function AdminDashboard({ onDeconnexion }) {
             <table className="w-full text-sm">
               <thead className="bg-stone-50 text-stone-500 text-left">
                 <tr>
-                  <th className="px-4 py-2">Plat</th>
+                  <th className="px-4 py-2">Produit</th>
+                  <th className="px-4 py-2">Type</th>
                   <th className="px-4 py-2">Prix</th>
                   <th className="px-4 py-2">Stock</th>
                   <th className="px-4 py-2">Statut</th>
@@ -256,6 +259,7 @@ export default function AdminDashboard({ onDeconnexion }) {
                 {plats.map((plat) => (
                   <tr key={plat.id} className="border-t border-stone-100">
                     <td className="px-4 py-2 font-medium text-stone-700">{plat.nom}</td>
+                    <td className="px-4 py-2 text-xs">{plat.type === 'lapin_frais' ? 'Lapin frais' : plat.type === 'lapin_prepare' ? 'Lapin préparé' : 'Plat de lapin'}</td>
                     <td className="px-4 py-2">{formatFCFA(plat.prix)}</td>
                     <td className="px-4 py-2">
                       <span className={(plat.stock ?? 0) === 0 ? 'text-red-600 font-semibold' : ''}>
@@ -383,6 +387,10 @@ export default function AdminDashboard({ onDeconnexion }) {
                   rows={2}
                   className="w-full border border-stone-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500"
                 />
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div><label className="block text-sm font-medium text-stone-600 mb-1">Type *</label><select required value={formPlat.type} onChange={(e) => setFormPlat({ ...formPlat, type: e.target.value })} className="w-full border border-stone-300 rounded-lg px-3 py-2 text-sm"><option value="lapin_frais">Lapin frais</option><option value="lapin_prepare">Lapin préparé</option><option value="plat">Plat de lapin</option></select></div>
+                <div><label className="block text-sm font-medium text-stone-600 mb-1">Prix gros (FCFA)</label><input type="number" min="0" value={formPlat.prixGros} onChange={(e) => setFormPlat({ ...formPlat, prixGros: e.target.value })} className="w-full border border-stone-300 rounded-lg px-3 py-2 text-sm"/></div>
               </div>
               <div className="grid grid-cols-3 gap-3">
                 <div>
