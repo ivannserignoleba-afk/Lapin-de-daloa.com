@@ -1,44 +1,6 @@
 import { NextResponse } from 'next/server';
-import { readData, writeData, generateId } from '../../../lib/db';
+import { supabaseAdmin } from '../../../lib/supabase';
 import { requeteAuthentifiee } from '../../../lib/auth';
-
-const FILE = 'plats.json';
-
-// GET /api/plats - liste tous les plats (catalogue public)
-export async function GET() {
-  const plats = readData(FILE);
-  return NextResponse.json(plats);
-}
-
-// POST /api/plats - ajoute un nouveau plat (réservé à l'administrateur)
-export async function POST(request) {
-  if (!requeteAuthentifiee(request)) {
-    return NextResponse.json({ error: 'Non authentifié.' }, { status: 401 });
-  }
-
-  const body = await request.json();
-  const { nom, description, prix, statut, image, stock } = body;
-
-  if (!nom || prix === undefined) {
-    return NextResponse.json(
-      { error: 'Les champs "nom" et "prix" sont obligatoires.' },
-      { status: 400 }
-    );
-  }
-
-  const plats = readData(FILE);
-  const nouveauPlat = {
-    id: generateId(),
-    nom,
-    description: description || '',
-    prix: Number(prix),
-    statut: statut || 'En stock',
-    image: image || 'https://picsum.photos/seed/lapin/600/400',
-    stock: stock !== undefined ? Number(stock) : 0,
-  };
-
-  plats.push(nouveauPlat);
-  writeData(FILE, plats);
-
-  return NextResponse.json(nouveauPlat, { status: 201 });
-}
+function mapProduct(p){return {id:p.id,nom:p.name,description:p.description||'',prix:p.price,prixGros:p.wholesale_price,type:p.type,stock:p.stock,statut:p.stock>0?'En stock':'Épuisé',image:p.image||''};}
+export async function GET(){const {data,error}=await supabaseAdmin.from('products').select('*').eq('active',true).order('created_at',{ascending:false});if(error)return NextResponse.json({error:error.message},{status:500});return NextResponse.json((data||[]).map(mapProduct));}
+export async function POST(request){if(!requeteAuthentifiee(request))return NextResponse.json({error:'Non authentifié.'},{status:401});const b=await request.json();if(!b.nom||b.prix===undefined||!b.type)return NextResponse.json({error:'Nom, prix et type sont obligatoires.'},{status:400});const {data,error}=await supabaseAdmin.from('products').insert({code:b.code||('P-'+Date.now()),name:b.nom,type:b.type,description:b.description||'',weight:b.weight||'',price:Number(b.prix),wholesale_price:Number(b.prixGros||0),stock:Number(b.stock||0),image:b.image||'',active:true}).select().single();if(error)return NextResponse.json({error:error.message},{status:400});if(Number(b.stock)>0)await supabaseAdmin.from('stock_movements').insert({product_id:data.id,type:'in',quantity:Number(b.stock),unit_price:Number(b.prix),reason:'Stock initial'});return NextResponse.json(mapProduct(data),{status:201});}
