@@ -1,50 +1,5 @@
 import { NextResponse } from 'next/server';
-import { readData, writeData } from '../../../../lib/db';
+import { supabaseAdmin } from '../../../../lib/supabase';
 import { requeteAuthentifiee } from '../../../../lib/auth';
-
-const FILE = 'plats.json';
-
-// PUT /api/plats/:id - modifie un plat (y compris changer le statut) - réservé à l'admin
-export async function PUT(request, { params }) {
-  if (!requeteAuthentifiee(request)) {
-    return NextResponse.json({ error: 'Non authentifié.' }, { status: 401 });
-  }
-
-  const { id } = params;
-  const body = await request.json();
-
-  const plats = readData(FILE);
-  const index = plats.findIndex((p) => p.id === id);
-
-  if (index === -1) {
-    return NextResponse.json({ error: 'Plat introuvable.' }, { status: 404 });
-  }
-
-  plats[index] = {
-    ...plats[index],
-    ...body,
-    id, // on empêche l'écrasement de l'id
-    prix: body.prix !== undefined ? Number(body.prix) : plats[index].prix,
-  };
-
-  writeData(FILE, plats);
-  return NextResponse.json(plats[index]);
-}
-
-// DELETE /api/plats/:id - supprime un plat - réservé à l'admin
-export async function DELETE(request, { params }) {
-  if (!requeteAuthentifiee(request)) {
-    return NextResponse.json({ error: 'Non authentifié.' }, { status: 401 });
-  }
-
-  const { id } = params;
-  const plats = readData(FILE);
-  const nouveauxPlats = plats.filter((p) => p.id !== id);
-
-  if (nouveauxPlats.length === plats.length) {
-    return NextResponse.json({ error: 'Plat introuvable.' }, { status: 404 });
-  }
-
-  writeData(FILE, nouveauxPlats);
-  return NextResponse.json({ success: true });
-}
+export async function PUT(request,{params}){if(!requeteAuthentifiee(request))return NextResponse.json({error:'Non authentifié.'},{status:401});const b=await request.json();const update={};if(b.nom!==undefined)update.name=b.nom;if(b.description!==undefined)update.description=b.description;if(b.prix!==undefined)update.price=Number(b.prix);if(b.prixGros!==undefined)update.wholesale_price=Number(b.prixGros);if(b.type!==undefined)update.type=b.type;if(b.image!==undefined)update.image=b.image;if(b.weight!==undefined)update.weight=b.weight;const {data,error}=await supabaseAdmin.from('products').update(update).eq('id',params.id).select().single();if(error)return NextResponse.json({error:error.message},{status:400});return NextResponse.json({id:data.id,nom:data.name,description:data.description,prix:data.price,prixGros:data.wholesale_price,type:data.type,stock:data.stock,statut:data.stock>0?'En stock':'Épuisé',image:data.image||''});}
+export async function DELETE(request,{params}){if(!requeteAuthentifiee(request))return NextResponse.json({error:'Non authentifié.'},{status:401});const {error}=await supabaseAdmin.from('products').update({active:false}).eq('id',params.id);if(error)return NextResponse.json({error:error.message},{status:400});return NextResponse.json({ok:true});}
