@@ -206,3 +206,22 @@ l'application (si le projet est connecté au dépôt GitHub).
 - Migration du stockage JSON vers une base de données persistante
 - Notifications par SMS/WhatsApp lors d'une nouvelle commande
 - Upload d'images des plats (ex: Vercel Blob / Cloudinary)
+
+
+## Version 2 — Gros, détail et gestion Supabase
+
+Le site gère désormais trois familles : **lapins frais**, **lapins préparés** et **plats de lapin**. Les clients peuvent commander en **gros** ou au **détail**. Une vente appelle une transaction PostgreSQL Supabase qui crée la commande, déduit le stock et écrit le mouvement de sortie.
+
+### Installation Supabase
+1. Créer un projet Supabase.
+2. Ouvrir SQL Editor et exécuter le fichier supabase/schema.sql.
+3. Dans Vercel, ajouter NEXT_PUBLIC_SUPABASE_URL et SUPABASE_SERVICE_ROLE_KEY.
+4. Redéployer le projet Next.js.
+5. Pour l'API Node.js séparée, copier backend/.env.example vers .env avec les mêmes identifiants puis lancer npm install et npm start dans backend/.
+
+### Gestion de stock
+- Entrée : approvisionnement / nouveau stock.
+- Sortie : vente, perte ou sortie manuelle.
+- Ajustement : correction de quantité.
+- Historique horodaté avec produit, quantité, motif et référence de vente.
+- Les ventes en gros utilisent automatiquement wholesale_price lorsqu'il est renseigné.
